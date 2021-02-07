@@ -10,7 +10,7 @@ class Experiment(
     private val ringSize: Int,
     private val queueSize: Int,
     private val delayMillis: Long,
-    private val load: Double
+    private val experimentLengthSeconds: Int
 ) {
     private val objectMapper = ObjectMapper()
     private val statisticsService = StatisticsService()
@@ -25,14 +25,14 @@ class Experiment(
         )
 
         ring.start()
-        sleep(5000)
+        sleep(experimentLengthSeconds * 1000L)
         ring.stop()
 
         saveStatistics()
     }
 
     private fun saveStatistics() {
-        val fileName = "experiment_ringSize=$ringSize,load=$load," +
+        val fileName = "experiment_ringSize=$ringSize," +
                 "delay=$delayMillis,queueSize=$queueSize.json"
         objectMapper
             .writerWithDefaultPrettyPrinter()

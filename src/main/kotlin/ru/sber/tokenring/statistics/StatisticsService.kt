@@ -9,5 +9,5 @@ class StatisticsService {
     }
 
     fun getStatistics() =
-        statistics.sortedBy(TokenArrival::arrivalTime)
+        statistics.sortedBy(TokenArrival::timestamp)
 }

@@ -33,8 +33,8 @@ class TokenProcessor(
         val currentTime = nanoTime()
         statistics.add(
             TokenArrival(
-                arrivalTime = currentTime,
-                roundTripTime = currentTime - token.sendTime
+                timestamp = currentTime,
+                rTT = currentTime - token.sendTime
             )
         )
     }
