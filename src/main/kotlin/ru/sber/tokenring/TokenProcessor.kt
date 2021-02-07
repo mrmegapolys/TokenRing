@@ -1,5 +1,6 @@
 package ru.sber.tokenring
 
+import ru.sber.tokenring.statistics.TokenArrival
 import java.lang.System.nanoTime
 import java.lang.Thread.sleep
 import java.util.Random
@@ -7,10 +8,10 @@ import java.util.Random
 class TokenProcessor(
     private val id: Int,
     private val delayMillis: Long,
-    private val tokenRingSize: Int,
-    private val statistics: Statistics
+    private val tokenRingSize: Int
 ) {
     private val random = Random()
+    val statistics = mutableListOf<TokenArrival>()
 
     fun process(token: Token) =
         when (id) {
@@ -20,11 +21,21 @@ class TokenProcessor(
         }
 
     private fun processAsSender(token: Token): Token {
-        statistics.handleTokenArrival(nanoTime() - token.sendTime)
+        acknowledgeTokenArrival(token)
         return Token(
             senderId = id,
             destinationID = generateRecipientId(),
             sendTime = nanoTime()
+        )
+    }
+
+    private fun acknowledgeTokenArrival(token: Token) {
+        val currentTime = nanoTime()
+        statistics.add(
+            TokenArrival(
+                arrivalTime = currentTime,
+                roundTripTime = currentTime - token.sendTime
+            )
         )
     }
 

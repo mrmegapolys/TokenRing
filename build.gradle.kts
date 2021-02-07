@@ -13,3 +13,7 @@ repositories {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }
+
+dependencies {
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.+")
+}

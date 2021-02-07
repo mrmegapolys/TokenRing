@@ -1,29 +1,54 @@
 package ru.sber.tokenring
 
+import ru.sber.tokenring.medium.BlockingQueueMedium
+import ru.sber.tokenring.medium.Medium
+import ru.sber.tokenring.statistics.StatisticsService
+
 class TokenRing(
     private val ringSize: Int,
     private val queueSize: Int,
     private val delayMillis: Long,
-    private val initialTokens: List<Collection<Token>>
+    private val initialTokens: List<Collection<Token>>,
+    private val statisticsService: StatisticsService
 ) {
-    lateinit var statistics: Statistics private set
     private lateinit var nodes: Collection<Node>
 
     fun start() {
-        statistics = Statistics()
-        val processors = sizeRange()
-            .map { TokenProcessor(it, delayMillis, ringSize, statistics) }
-        val mediums = sizeRange()
-            .map { BlockingQueueMedium(queueSize) }
-        nodes = sizeRange()
-            .map { index -> Node(mediums[index], mediums[(index + 1) % ringSize], processors[index]) }
+        val processors = generateProcessors()
+        val mediums = generateMediums()
+        nodes = generateNodes(mediums, processors)
 
         nodes.forEachIndexed { index, node -> node.start(initialTokens[index]) }
     }
 
-    private fun sizeRange() = (0 until ringSize)
-
     fun stop() {
         nodes.forEach(Node::stop)
     }
+
+    private fun generateNodes(
+        mediums: List<Medium>,
+        processors: List<TokenProcessor>
+    ) = sizeRange()
+        .map { index ->
+            Node(
+                prevMedium = mediums[index],
+                nextMedium = mediums[(index + 1) % ringSize],
+                tokenProcessor = processors[index],
+                statisticsService = statisticsService
+            )
+        }
+
+    private fun generateMediums() = sizeRange()
+        .map { BlockingQueueMedium(queueSize) }
+
+    private fun generateProcessors() = sizeRange()
+        .map { index ->
+            TokenProcessor(
+                id = index,
+                delayMillis = delayMillis,
+                tokenRingSize = ringSize
+            )
+        }
+
+    private fun sizeRange() = (0 until ringSize)
 }

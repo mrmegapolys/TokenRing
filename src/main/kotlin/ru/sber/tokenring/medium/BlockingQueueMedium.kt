@@ -1,5 +1,6 @@
-package ru.sber.tokenring
+package ru.sber.tokenring.medium
 
+import ru.sber.tokenring.Token
 import java.util.concurrent.ArrayBlockingQueue
 
 class BlockingQueueMedium(capacity: Int) : Medium {
