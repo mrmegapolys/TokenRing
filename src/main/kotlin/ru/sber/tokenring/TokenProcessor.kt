@@ -40,7 +40,9 @@ class TokenProcessor(
     }
 
     private fun processAsRecipient(token: Token) =
-        token.apply { sleep(delayMillis) }
+        token.apply {
+            if (delayMillis != 0L) sleep(delayMillis)
+        }
 
     private fun generateRecipientId(): Int {
         while (true) {

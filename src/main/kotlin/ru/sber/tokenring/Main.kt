@@ -1,14 +1,15 @@
 package ru.sber.tokenring
 
 fun main() {
-    val experiments = (0..1).map { delayMillis ->
-        (2..24).map { ringSize ->
-            listOf(1, ringSize / 2, ringSize).map { queueSize ->
+    val experiments = (2..24).map { ringSize ->
+        (1..1).map { queueSize ->
+            listOf(0.25, 0.5, 0.75, 1.0).map { load ->
                 Experiment(
-                    delayMillis = delayMillis.toLong(),
                     ringSize = ringSize,
                     queueSize = queueSize,
-                    experimentLengthSeconds = 30
+                    delayMillis = 0L,
+                    load = load,
+                    experimentLengthSeconds = 20
                 )
             }
         }.flatten()

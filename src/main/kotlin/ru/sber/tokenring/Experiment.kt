@@ -10,10 +10,12 @@ class Experiment(
     private val ringSize: Int,
     private val queueSize: Int,
     private val delayMillis: Long,
+    load: Double,
     private val experimentLengthSeconds: Int
 ) {
     private val objectMapper = ObjectMapper()
     private val statisticsService = StatisticsService()
+    private val initialTokensNum = (load * ringSize).toInt()
 
     fun run() {
         val ring = TokenRing(
@@ -32,15 +34,15 @@ class Experiment(
     }
 
     private fun saveStatistics() {
-        val fileName = "experiment_ringSize=$ringSize," +
+        val fileName = "experiment_ringSize=$ringSize,tokens=$initialTokensNum," +
                 "delay=$delayMillis,queueSize=$queueSize.json"
         objectMapper
             .writerWithDefaultPrettyPrinter()
             .writeValue(File(fileName), statisticsService.getStatistics())
     }
 
-    private fun generateInitialTokens() = (0 until ringSize)
-        .map {
-            listOf(Token(it, (it + 3) % ringSize, nanoTime()))
-        }
+    private fun generateInitialTokens() =
+        (0 until initialTokensNum).map {
+            listOf(Token(it, (it + 1) % ringSize, nanoTime()))
+        } + List(ringSize - initialTokensNum) { emptyList() }
 }
